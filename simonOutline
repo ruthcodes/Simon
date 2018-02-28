@@ -1,10 +1,11 @@
 //four buttons in game
 var buttons = ["red", "yellow", "green", "blue"];
-
+var strictMode = true;
+var exit = false;
 
 // user story: I can see how many steps are in the series
-//length og computerMoves array
-var counter;
+//length of computerMoves array
+var counter = 0;
 
 //to save series of ranndomly chosen steps
 var computerMoves = [];
@@ -16,12 +17,15 @@ var userMoves = [];
 function play(){
   selectMove();
   playMoves();
-  var entered = prompt("red, yellow, green or blue?");
+  var entered = "red";
   userMove(entered);
   if (compare()){
     console.log("correct!");
   } else {
     console.log("false");
+    if (strictMode){
+      exit = true;
+    }
   }
 }
 
@@ -30,6 +34,7 @@ function play(){
 function selectMove(){
   var move = buttons[Math.floor(Math.random() * 4)];
   computerMoves.push(move);
+  counter +=1;
 }
 
 //function for user to play moves
@@ -37,25 +42,6 @@ function selectMove(){
 function userMove(entered){
   userMoves.push(entered);
 }
-
-var entered;
-var readline = require('readline');
-
-var rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-rl.question("red, yellow, green or blue?", function(answer) {
-  // TODO: Log the answer in a database
-  entered = answer;
-  console.log("you entered: " + entered);
-  userMove(entered);
-  console.log("userMoves array: " + userMoves);
-
-  rl.close();
-});
-
 
 
 //function to compare user input to moves array
@@ -75,6 +61,6 @@ function playMoves(){
   }
 }
 
-/*while (computerMoves.length < 20){
+/*while (computerMoves.length < 20  && !exit){
   play();
 }*/
