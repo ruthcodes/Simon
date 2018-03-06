@@ -1,66 +1,243 @@
-//four buttons in game
-var buttons = ["red", "yellow", "green", "blue"];
-var strictMode = true;
-var exit = false;
+$(document).ready(function(){
+  var on = false;
+  var whosTurn = "computer";
 
-// user story: I can see how many steps are in the series
-//length of computerMoves array
-var counter = 0;
+  //four buttons in game
+  var buttons = ["red", "yellow", "green", "blue"];
+  var strictMode = false;
+  var exit = false;
 
-//to save series of ranndomly chosen steps
-var computerMoves = [];
-//to save user moves (must be compared as they are entered)
-//- possibly dont want to save them in an arrays
-var userMoves = [];
+  //code to take user input
+  $( ".colour" ).each(function() {
+    $(this).on("click", function(event){
+      if (on){
+        var btnColour = $(this).attr('id');
+        userMove(btnColour);
+        flash(btnColour);
+        playAudio(btnColour);
+      }
+    });   
+  });
 
-//function to start game
-function play(){
-  selectMove();
-  playMoves();
-  var entered = "red";
-  userMove(entered);
-  if (compare()){
-    console.log("correct!");
-  } else {
-    console.log("false");
+  //on/off switch
+  $('#onOff :checkbox').change(function() { 
+    if (this.checked) {
+      on = false;
+      computerMoves = [];
+      userMoves = [];
+      counter = 0;
+      $("#counter").css('color', '#58655C');
+      $("#counter").text('00');
+      strictMode = false;
+      $(".fa").css('visibility', 'hidden');
+    } else {
+      on = true;
+      $("#counter").css('color', 'white');
+      flash("red");
+      playAudio("red");
+      setTimeout(function(){ flash("blue"); playAudio("blue"); }, 500);  
+      setTimeout(function(){ flash("yellow"); playAudio("yellow"); }, 1000); 
+      setTimeout(function(){ flash("green"); playAudio("green"); }, 1500); 
+    }
+  });
+
+  $("#strict").on("click", function(e){
+    if (on){
+      if (!strictMode){
+        strictMode = true;
+        $(".fa").css('visibility', 'visible');
+      } else {
+        strictMode = false;
+        $(".fa").css('visibility', 'hidden');
+      }
+    }
+  });
+
+  $("#start").on("click", function(e){
+
+    if (on){
+      play();
+      /* selectMove();
+      setTimeout(function(){ wrongMove(); }, 2000); */
+    }
+  });
+
+  function flash(btnColor){
+    var flashColor;
+    var defaultColor;
+    switch(btnColor) {
+      case "red":
+        flashColor = "red";
+        defaultColor = 'linear-gradient(#BB2825 0%, #CF2824 5%, #C91B1C 50%, #CF2824 100%)';
+        break;
+      case "green":
+        flashColor = "green";
+        defaultColor = "linear-gradient(#038845 0%, #27AD60 5%, #00974A 50%,#27AD60 95%, #038845 100%";
+        break;
+      case "yellow":
+        flashColor = "yellow";
+        defaultColor = "linear-gradient(#D7C017 0%, #DAC014 5%, #D7BE19 50%, #DAC014 100%";
+        break;
+      case "blue":
+        flashColor = "blue";
+        defaultColor = "linear-gradient(#0066B2 0%, #0292D0 5%, #0278BE 50%, #0292D0 100%";
+        break;
+    }
+    console.log("flashing!: " + flashColor );
+    $('#' + btnColor).css('background', flashColor);
+    setTimeout(function(){ $('#' + btnColor).css('background',defaultColor); }, 500);                  
+
+  }
+
+
+  // user story: I can see how many steps are in the series
+  //length of computerMoves array
+  var counter = 0;
+
+  //to save series of ranndomly chosen steps
+  var computerMoves = [];
+  //to save user moves (must be compared as they are entered)
+  //- possibly dont want to save them in an arrays
+  var userMoves = [];
+
+  //function to start game
+  //loop, run while computerMoves.length < 20  && !exit && on
+  //call this function recursively set interval, clicking start clears the interval and calls it again
+  // var myVar = setTimeout(function(){ play() }, 500);
+
+  function play(){
+    //chose computer move and play it
+    //selectMove will return a resolved promise once finished running
+    selectMove();
+
+    //wait for input from user
+    playMoves().then(function(){
+      //if the user doesnt press something in 5 seconds
+      //this is not right, maybe change setTimeout to be only on the if, have all the else code separate
+      setTimeout(function(){
+        if (!userMoves || userMoves.length < 1){
+          //call wrongMove
+          wrongMove();
+        } else {
+          //if they press comething, check for match
+          if (compare()){
+            return play();
+          } else {
+            wrongMove();
+          }
+        }
+      }, 5000);
+    });
+
+
+    //if you dont receive input within 5 seconds, wrongMove()
+
+    //after user input, compare user input to computerMoves
+
+    //if different, wrongMove() and either quit or replay computer move
+
+    //end loop
+
+  }
+  // wrongMove needs to quit game or replay depending on strict, and set counter
+  function wrongMove(){
+    $("#counter").text("--");
     if (strictMode){
-      exit = true;
+      counter = 0;
+      setTimeout(function(){ $("#counter").text("00"); }, 500); 
+      computerMoves = [];
+      userMoves = [];
+    } else {
+      setTimeout(function(){ if (counter <10){
+        $("#counter").text("0" + counter);
+      } else {
+        $("#counter").text(counter);
+      }; }, 500); 
     }
+    flash("red");
+    flash("blue");
+    flash("yellow");
+    flash("green");
+    playAudio("blue");
+    //needs to continue game after this, maybe move the playmoves up into play function?
+    setTimeout(function(){ playMoves(); }, 2000);
   }
-}
-
-//function to randomly select one of the vars
-//and push to computerMoves array
-function selectMove(){
-  var move = buttons[Math.floor(Math.random() * 4)];
-  computerMoves.push(move);
-  counter +=1;
-}
-
-//function for user to play moves
-//and push to userMoves array
-function userMove(entered){
-  userMoves.push(entered);
-}
-
-
-//function to compare user input to moves array
-function compare(){
-  for (var i=0; i<computerMoves.length; i++){
-    if (computerMoves[i] != userMoves[i]){
-      return false;
+  //function to randomly select one of the vars
+  //and push to computerMoves array
+  function selectMove(){
+    var move = buttons[Math.floor(Math.random()*buttons.length)];
+    console.log("random move: " + move);
+    computerMoves.push(move);
+    counter +=1;
+    if (counter <10){
+      $("#counter").text("0" + counter);
+    } else {
+      $("#counter").text(counter);
     }
+    console.log(computerMoves);
   }
-  return true;
-}
 
-//function to play the saved series of moves
-function playMoves(){
-  for (var i=0; i< computerMoves.length; i++){
-    console.log(computerMoves[i]);
+  //function for user to play moves
+  //and push to userMoves array
+  function userMove(entered){
+    userMoves.push(entered);
   }
-}
 
-/*while (computerMoves.length < 20  && !exit){
+
+  //function to compare user input to moves array
+  //empty moves after compare
+  function compare(){
+    for (var i=0; i<computerMoves.length; i++){
+      if (computerMoves[i] != userMoves[i]){
+        userMoves = [];
+        return false;
+      }
+    }
+    userMoves = [];
+    return true;
+  }
+
+  function playAudio(colour){
+    var file;
+    switch(colour) {
+      case "red":
+        file="https://s3.amazonaws.com/freecodecamp/simonSound1.mp3";
+        break;
+      case "green":
+        file="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3"
+        break;
+      case "yellow":
+        file="https://s3.amazonaws.com/freecodecamp/simonSound3.mp3"
+        break;
+      case "blue":
+        file="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3"
+        break;
+    }
+    var audio = new Audio(file);
+    audio.play();
+  }
+
+  var interval = 1000; 
+
+  function playMoves(){
+    var promise = Promise.resolve();
+    computerMoves.forEach(function (i) {
+      promise = promise.then(function () {
+        flash(i);
+        playAudio(i);
+        return new Promise(function (resolve) {
+          setTimeout(resolve, interval);
+        });
+      });
+    });
+    //returns a resolved promised once down, to chain next function from
+    return Promise.resolve();
+
+  };
+});
+
+
+/*while (computerMoves.length < 20  && !exit && on){
   play();
 }*/
+
