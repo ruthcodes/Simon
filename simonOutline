@@ -1,20 +1,30 @@
 $(document).ready(function(){
   var on = false;
+  var gameRunning = false;
   var whosTurn = "computer";
+  var userButtonClick;
+  var count = 0;
 
   //four buttons in game
   var buttons = ["red", "yellow", "green", "blue"];
   var strictMode = false;
-  var exit = false;
 
   //code to take user input
   $( ".colour" ).each(function() {
     $(this).on("click", function(event){
-      if (on){
+      if (on && gameRunning){
+        //  intvl += 500;
         var btnColour = $(this).attr('id');
         userMove(btnColour);
         flash(btnColour);
         playAudio(btnColour);
+        
+        console.log(count);
+        console.log("user moved: " + userMoves[count]);
+        clearTimeout(userButtonClick);
+        userButtonClick = setTimeout(function(){ usersTurn(btnColour); }, 5000);
+
+
       }
     });   
   });
@@ -23,9 +33,7 @@ $(document).ready(function(){
   $('#onOff :checkbox').change(function() { 
     if (this.checked) {
       on = false;
-      computerMoves = [];
-      userMoves = [];
-      counter = 0;
+      reset();
       $("#counter").css('color', '#58655C');
       $("#counter").text('00');
       strictMode = false;
@@ -56,6 +64,7 @@ $(document).ready(function(){
   $("#start").on("click", function(e){
 
     if (on){
+      gameRunning = true;
       play();
       /* selectMove();
       setTimeout(function(){ wrongMove(); }, 2000); */
@@ -63,32 +72,39 @@ $(document).ready(function(){
   });
 
   function flash(btnColor){
-    var flashColor;
-    var defaultColor;
-    switch(btnColor) {
-      case "red":
-        flashColor = "red";
-        defaultColor = 'linear-gradient(#BB2825 0%, #CF2824 5%, #C91B1C 50%, #CF2824 100%)';
-        break;
-      case "green":
-        flashColor = "green";
-        defaultColor = "linear-gradient(#038845 0%, #27AD60 5%, #00974A 50%,#27AD60 95%, #038845 100%";
-        break;
-      case "yellow":
-        flashColor = "yellow";
-        defaultColor = "linear-gradient(#D7C017 0%, #DAC014 5%, #D7BE19 50%, #DAC014 100%";
-        break;
-      case "blue":
-        flashColor = "blue";
-        defaultColor = "linear-gradient(#0066B2 0%, #0292D0 5%, #0278BE 50%, #0292D0 100%";
-        break;
+    if(on){
+      var flashColor;
+      var defaultColor;
+      switch(btnColor) {
+        case "red":
+          flashColor = "red";
+          defaultColor = 'linear-gradient(#BB2825 0%, #CF2824 5%, #C91B1C 50%, #CF2824 100%)';
+          break;
+        case "green":
+          flashColor = "green";
+          defaultColor = "linear-gradient(#038845 0%, #27AD60 5%, #00974A 50%,#27AD60 95%, #038845 100%";
+          break;
+        case "yellow":
+          flashColor = "yellow";
+          defaultColor = "linear-gradient(#D7C017 0%, #DAC014 5%, #D7BE19 50%, #DAC014 100%";
+          break;
+        case "blue":
+          flashColor = "blue";
+          defaultColor = "linear-gradient(#0066B2 0%, #0292D0 5%, #0278BE 50%, #0292D0 100%";
+          break;
+      }
+      // console.log("flashing!: " + flashColor );
+      $('#' + btnColor).css('background', flashColor);
+      setTimeout(function(){ $('#' + btnColor).css('background',defaultColor); }, 500);                  
     }
-    console.log("flashing!: " + flashColor );
-    $('#' + btnColor).css('background', flashColor);
-    setTimeout(function(){ $('#' + btnColor).css('background',defaultColor); }, 500);                  
-
   }
 
+  function reset(){
+    counter = 0;
+    computerMoves = [];
+    userMoves = [];
+
+  }
 
   // user story: I can see how many steps are in the series
   //length of computerMoves array
@@ -105,42 +121,45 @@ $(document).ready(function(){
   //call this function recursively set interval, clicking start clears the interval and calls it again
   // var myVar = setTimeout(function(){ play() }, 500);
 
-  function play(){
-    //chose computer move and play it
-    //selectMove will return a resolved promise once finished running
-    selectMove();
+  function play(skip){
 
-    //wait for input from user
-    playMoves().then(function(){
-      //if the user doesnt press something in 5 seconds
-      //this is not right, maybe change setTimeout to be only on the if, have all the else code separate
-      setTimeout(function(){
-        if (!userMoves || userMoves.length < 1){
-          //call wrongMove
-          wrongMove();
-        } else {
-          //if they press comething, check for match
-          if (compare()){
-            return play();
-          } else {
-            wrongMove();
-          }
-        }
-      }, 5000);
-    });
+    if (on){
+      console.log("playing");
+      //chose computer move and play it
+      //selectMove will return a resolved promise once finished running
+
+      //if playing after WrongMove, dont select moves again, just play them
+      if(skip === undefined){
+        selectMove();
+      }
+
+      //wait for input from user
+      playMoves().then(function(){
+        whosTurn = "human";
 
 
-    //if you dont receive input within 5 seconds, wrongMove()
 
-    //after user input, compare user input to computerMoves
+        //if the user doesnt press something in 5 seconds
+        //this is not right, maybe change setTimeout to be only on the if, have all the else code separate
 
-    //if different, wrongMove() and either quit or replay computer move
 
-    //end loop
+      });
 
+
+      //if you dont receive input within 5 seconds, wrongMove()
+
+      //after user input, compare user input to computerMoves
+
+      //if different, wrongMove() and either quit or replay computer move
+
+      //end loop
+
+    }
   }
   // wrongMove needs to quit game or replay depending on strict, and set counter
   function wrongMove(){
+    console.log("uh oh wrong");
+    clearTimeout(userButtonClick);
     $("#counter").text("--");
     if (strictMode){
       counter = 0;
@@ -148,6 +167,7 @@ $(document).ready(function(){
       computerMoves = [];
       userMoves = [];
     } else {
+      userMoves = [];
       setTimeout(function(){ if (counter <10){
         $("#counter").text("0" + counter);
       } else {
@@ -159,8 +179,13 @@ $(document).ready(function(){
     flash("yellow");
     flash("green");
     playAudio("blue");
-    //needs to continue game after this, maybe move the playmoves up into play function?
-    setTimeout(function(){ playMoves(); }, 2000);
+
+    if(strictMode){
+      setTimeout(function(){ play(); }, 2000);
+    }else{
+      setTimeout(function(){ play("skip"); }, 2000);
+    }
+
   }
   //function to randomly select one of the vars
   //and push to computerMoves array
@@ -184,42 +209,98 @@ $(document).ready(function(){
   }
 
 
+  //need to compare every move, not all moves
+  //wait 5 seconds, then check if move == comp
+  //user button click should start and stop the timers.
+  //if it is and usermove length is less than compmove length, call usersTurn again
+  // if it matches and lengths are the same, call play
+  //if it doesnt match, call wrong move
+  function usersTurn(move){
+    //needs to only take one move at a time (will take green, yellow, which doesnt match green)
+    console.log("moves by person: " + userMoves );
+    console.log("comparing moves: computer: " + computerMoves + " and user: " + move );
+    console.log(count);
+    console.log(computerMoves[count]);
+    if (move == computerMoves[count]){
+      count +=1;
+      console.log("userMoves length is: " + userMoves.length + " and comp is: " + computerMoves.length);
+      if(userMoves.length == computerMoves.length){
+        clearTimeout(userButtonClick);
+        play();
+      } else {
+        wrongMove();
+      }
+    } else {
+      wrongMove();
+    }
+
+    /*  if (userMoves.length == computerMoves.length){
+      return compare();
+    }
+    console.log("userMoves and length: " + userMoves.length + " , " + userMoves);
+    console.log("countMoves: " + countMoves);
+    myTimer = setTimeout(function(){if (userMoves.length < countMoves){
+      return wrongMove();
+    } else {
+      countMoves += 1;
+      return usersTurn();
+    }
+                          ;}, intvl);*/
+    //function needs to wait 3 seconds for a move
+    //if no move in timeframe, reject promise and call wrong move
+    //if moved, reset timer to 3 seconds and wait for next move
+    //keep doing that until userMoves.length == computerMoves.length
+    //return resolved promise
+  };
+
+
   //function to compare user input to moves array
   //empty moves after compare
+
+  //instead of returning true/false, return play or wrong
+  //need to make sure that moves are wiped every time loop starts again
   function compare(){
+    countMoves = 1;
     for (var i=0; i<computerMoves.length; i++){
       if (computerMoves[i] != userMoves[i]){
         userMoves = [];
-        return false;
+        return wrongMove();
       }
     }
+    console.log("the moves matched. starting computer's next turn")
     userMoves = [];
-    return true;
+    return play();
   }
 
   function playAudio(colour){
-    var file;
-    switch(colour) {
-      case "red":
-        file="https://s3.amazonaws.com/freecodecamp/simonSound1.mp3";
-        break;
-      case "green":
-        file="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3"
-        break;
-      case "yellow":
-        file="https://s3.amazonaws.com/freecodecamp/simonSound3.mp3"
-        break;
-      case "blue":
-        file="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3"
-        break;
+    if (on){
+      var file;
+      switch(colour) {
+        case "red":
+          file="https://s3.amazonaws.com/freecodecamp/simonSound1.mp3";
+          break;
+        case "green":
+          file="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3"
+          break;
+        case "yellow":
+          file="https://s3.amazonaws.com/freecodecamp/simonSound3.mp3"
+          break;
+        case "blue":
+          file="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3"
+          break;
+      }
+      var audio = new Audio(file);
+      audio.play();
     }
-    var audio = new Audio(file);
-    audio.play();
   }
 
   var interval = 1000; 
 
   function playMoves(){
+    console.log("clearing users moves, playing computers: ");
+    userMoves = [];
+    console.log("userMoves: " + userMoves);
+    console.log("playing comp moves: " + computerMoves[0]);
     var promise = Promise.resolve();
     computerMoves.forEach(function (i) {
       promise = promise.then(function () {
@@ -231,6 +312,7 @@ $(document).ready(function(){
       });
     });
     //returns a resolved promised once down, to chain next function from
+    console.log("resolved computer turn turn");
     return Promise.resolve();
 
   };
