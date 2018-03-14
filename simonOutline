@@ -5,6 +5,8 @@ $(document).ready(function(){
   var userButtonClick;
   var count = 0;
 
+  var it = 0;
+
   //four buttons in game
   var buttons = ["red", "yellow", "green", "blue"];
   var strictMode = false;
@@ -13,17 +15,24 @@ $(document).ready(function(){
   $( ".colour" ).each(function() {
     $(this).on("click", function(event){
       if (on && gameRunning){
-        //  intvl += 500;
+       console.log(whosTurn + "whos turn is it?");
         var btnColour = $(this).attr('id');
         userMove(btnColour);
         flash(btnColour);
         playAudio(btnColour);
-        
-        console.log(count);
-        console.log("user moved: " + userMoves[count]);
-        clearTimeout(userButtonClick);
-        userButtonClick = setTimeout(function(){ usersTurn(btnColour); }, 5000);
 
+
+        if (btnColour == computerMoves[it]){
+          it+=1;
+          clearTimeout(userButtonClick);
+          userButtonClick = setTimeout(function(){ usersTurn(btnColour); }, 5000);
+        } else {
+          it=0;
+          wrongMove();
+        }
+
+        //users turn compares, but waits and allows next click before telling you it's wrong
+        //need to force turn to wait for previous turn to resolve before allowing next (promise)
 
       }
     });   
@@ -93,7 +102,7 @@ $(document).ready(function(){
           defaultColor = "linear-gradient(#0066B2 0%, #0292D0 5%, #0278BE 50%, #0292D0 100%";
           break;
       }
-      // console.log("flashing!: " + flashColor );
+
       $('#' + btnColor).css('background', flashColor);
       setTimeout(function(){ $('#' + btnColor).css('background',defaultColor); }, 500);                  
     }
@@ -122,9 +131,12 @@ $(document).ready(function(){
   // var myVar = setTimeout(function(){ play() }, 500);
 
   function play(skip){
+    console.log("comps turn");
+    whosTurn="computer";
+    console.log(whosTurn);
 
     if (on){
-      console.log("playing");
+
       //chose computer move and play it
       //selectMove will return a resolved promise once finished running
 
@@ -135,6 +147,7 @@ $(document).ready(function(){
 
       //wait for input from user
       playMoves().then(function(){
+        it=0;
         whosTurn = "human";
 
 
@@ -191,7 +204,7 @@ $(document).ready(function(){
   //and push to computerMoves array
   function selectMove(){
     var move = buttons[Math.floor(Math.random()*buttons.length)];
-    console.log("random move: " + move);
+
     computerMoves.push(move);
     counter +=1;
     if (counter <10){
@@ -199,7 +212,7 @@ $(document).ready(function(){
     } else {
       $("#counter").text(counter);
     }
-    console.log(computerMoves);
+   
   }
 
   //function for user to play moves
@@ -217,22 +230,13 @@ $(document).ready(function(){
   //if it doesnt match, call wrong move
   function usersTurn(move){
     //needs to only take one move at a time (will take green, yellow, which doesnt match green)
-    console.log("moves by person: " + userMoves );
-    console.log("comparing moves: computer: " + computerMoves + " and user: " + move );
-    console.log(count);
-    console.log(computerMoves[count]);
-    if (move == computerMoves[count]){
-      count +=1;
-      console.log("userMoves length is: " + userMoves.length + " and comp is: " + computerMoves.length);
+
       if(userMoves.length == computerMoves.length){
         clearTimeout(userButtonClick);
+        whosTurn="computer";
         play();
-      } else {
-        wrongMove();
-      }
-    } else {
-      wrongMove();
-    }
+      } 
+   
 
     /*  if (userMoves.length == computerMoves.length){
       return compare();
@@ -267,7 +271,7 @@ $(document).ready(function(){
         return wrongMove();
       }
     }
-    console.log("the moves matched. starting computer's next turn")
+
     userMoves = [];
     return play();
   }
@@ -297,10 +301,9 @@ $(document).ready(function(){
   var interval = 1000; 
 
   function playMoves(){
-    console.log("clearing users moves, playing computers: ");
+
     userMoves = [];
-    console.log("userMoves: " + userMoves);
-    console.log("playing comp moves: " + computerMoves[0]);
+
     var promise = Promise.resolve();
     computerMoves.forEach(function (i) {
       promise = promise.then(function () {
@@ -312,7 +315,7 @@ $(document).ready(function(){
       });
     });
     //returns a resolved promised once down, to chain next function from
-    console.log("resolved computer turn turn");
+
     return Promise.resolve();
 
   };
