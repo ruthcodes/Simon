@@ -18,10 +18,12 @@ $(document).ready(function(){
         flash(btnColour);
         playAudio(btnColour);
 
+        clearTimeout(userButtonClick);
+
         if (btnColour == computerMoves[compareIndex]){
           compareIndex+=1;
-          clearTimeout(userButtonClick);
-          userButtonClick = setTimeout(function(){ usersTurn(btnColour); }, 5000);
+          setTimeout(function(){usersTurn(btnColour);}, 2000);
+          userButtonClick = setTimeout(function(){ wrongMove(); }, 5000);
         } else {
           compareIndex=0;
           wrongMove();
@@ -35,6 +37,7 @@ $(document).ready(function(){
     if (this.checked) {
       on = false;
       reset();
+      gameRunning = false;
       $("#counter").css('color', '#58655C');
       $("#counter").text('00');
       strictMode = false;
@@ -63,7 +66,7 @@ $(document).ready(function(){
   });
 
   $("#start").on("click", function(e){
-    if (on){
+    if (on && !gameRunning){
       gameRunning = true;
       play();
     }
@@ -92,7 +95,7 @@ $(document).ready(function(){
           break;
       }
       $('#' + btnColor).css('background', flashColor);
-      setTimeout(function(){ $('#' + btnColor).css('background',defaultColor); }, 500);      
+      setTimeout(function(){ $('#' + btnColor).css('background',defaultColor); }, 200);      
     }
   }
 
@@ -110,19 +113,16 @@ $(document).ready(function(){
 
 
   function play(skip){
-    console.log("comps turn");
     whosTurn="computer";
-    console.log(whosTurn);
-
     if (on){
 
       if(skip === undefined){
         selectMove();
       }
 
-      playMoves().then(function(){
+      playMoves().done(function(){
         compareIndex=0;
-        whosTurn = "human";
+        userButtonClick = setTimeout(function(){ wrongMove(); }, 5000);
       });
     }
   }
@@ -130,12 +130,14 @@ $(document).ready(function(){
   function wrongMove(){
     console.log("uh oh wrong");
     clearTimeout(userButtonClick);
+    console.log("clearing wrongMove");
     $("#counter").text("--");
     if (strictMode){
       counter = 0;
       setTimeout(function(){ $("#counter").text("00"); }, 500); 
       computerMoves = [];
       userMoves = [];
+      gameRunning = false;
     } else {
       userMoves = [];
       setTimeout(function(){ if (counter <10){
@@ -174,11 +176,23 @@ $(document).ready(function(){
   }
 
   function usersTurn(move){
-      if(userMoves.length == computerMoves.length){
-        clearTimeout(userButtonClick);
+    if(userMoves.length == computerMoves.length){
+      clearTimeout(userButtonClick);
+      if (userMoves.length == 20){
+        flash("red");
+        flash("blue");
+        flash("yellow");
+        flash("green");
+        playAudio("red");
+        $("#counter").text("!!");
+        reset();
+        gameRunning = false;
+      } else {
+        console.log("clearing usersTurn");
         whosTurn="computer";
         play();
-      } 
+      }
+    } 
   };
 
   function playAudio(colour){
@@ -202,19 +216,24 @@ $(document).ready(function(){
       audio.play();
     }
   }
-
+  
   function playMoves(){
     userMoves = [];
+    var promises = [];
     var promise = Promise.resolve();
-    computerMoves.forEach(function (i) {
-      promise = promise.then(function () {
+    computerMoves.forEach(function(i){
+      whosTurn="computer";
+      promises.push(
+        promise = promise.then(function () {
         flash(i);
         playAudio(i);
         return new Promise(function (resolve) {
           setTimeout(resolve, 1000);
         });
-      });
-    });
-    return Promise.resolve();
+      })
+      )
+    })
+    return Promise.all(promises);
   };
+  
 });
