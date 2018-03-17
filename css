@@ -1,0 +1,254 @@
+/*Added height and width/float to color IDs to try and fix screenshot*/
+
+html{
+  background-color: #383433;
+  background-image: url("https://images.pexels.com/photos/82256/pexels-photo-82256.jpeg?w=1260&h=750&auto=compress&cs=tinysrgb");
+  background-repeat: no-repeat;
+  background-size:cover;
+}
+
+.wrapper {
+  border-radius: 300px;
+  display: grid;
+  height: 500px;
+  width: 500px;
+  margin: 20px auto;
+  padding: 15px;
+  background-color: black;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "green  red"
+    "yellow blue";
+  z-index: 5;
+}
+
+#green{
+  grid-area: green;
+  background-color:green;
+  border-radius: 300px 0px 0px 0px;
+  border-right: 10px;
+  border-bottom: 10px;
+  border-color: black;
+  border-style: solid;
+  background: linear-gradient(#038845 0%, #27AD60 5%, #00974A 50%,#27AD60 95%, #038845 100%);
+  cursor: pointer;
+}
+
+#green:active, #red:active{
+  transform: translate(0, 3px);
+  z-index: 6;
+}
+
+#red{
+  grid-area: red;
+  background-color: red;
+  border-radius: 0px 300px 0px 0px;
+  border-left: 10px;
+  border-bottom: 10px;
+  border-color: black;
+  border-style: solid;
+  background: linear-gradient(#BB2825 0%, #CF2824 5%, #C91B1C 50%, #CF2824 100%);
+  cursor: pointer;
+}
+
+#yellow{
+  grid-area: yellow;
+  background-color: yellow;
+  border-radius: 0px 0px 0px 300px;
+  border-top: 10px;
+  border-right: 10px;
+  border-color: black;
+  border-style: solid;
+  background: linear-gradient(#D7C017 0%, #DAC014 5%, #D7BE19 50%, #DAC014 100%);
+  cursor: pointer;
+}
+
+#blue{
+  grid-area:blue;
+  background-color:blue;
+  border-radius: 0px 0px 300px 0px;
+  border-top: 10px;
+  border-left: 10px;
+  border-color: black;
+  border-style: solid;
+  background: linear-gradient(#0066B2 0%, #0292D0 5%, #0278BE 50%, #0292D0 100%);
+  cursor: pointer;
+}
+
+#yellow:active, #blue:active{
+  transform: translate(0, 3px);
+  z-index: 6;
+}
+
+/*controls*/
+.wrapper > div:nth-child(5){
+  grid-column: 1 / 3;
+  grid-row: 1 / 3;
+  margin: 150px auto;
+  background-color: black;
+  color: white;
+  text-align: center;
+  height: 200px;
+  width: 200px;
+  border-radius: 200px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 40px;
+    background: radial-gradient(#191A1E 5%, 	black 50%, #191A1E 100%);
+  z-index: 10;
+  line-height: 42px;
+}
+
+b{
+  font-family: 'Alfa Slab One', cursive;
+  letter-spacing: 1px;
+}
+/*counter*/
+#counter{
+  width: 45px;
+  height: 32px;
+  font-size: 23px;
+  color: #58655C;
+  background-color: #58655C;
+  border: 1px solid #444c47;
+  position: relative;
+  top: -26px;
+  left: 20px;
+  padding-left:3px;
+  padding-top: 5px;
+  letter-spacing: 3px;
+  line-height: 25px;
+}
+
+
+button{
+  height: 20px;
+  width: 20px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+#buttons{
+
+  width: 65px;
+  height: 50px;
+  position: relative;
+  top: -70px;
+  left: 115px;
+  font-size: 10px;
+  line-height: 20px;
+  text-align: left;
+}
+
+#strictText{
+  display: inline-block;
+}
+#startText{
+  display: inline-block;
+}
+#setStart{
+  margin-bottom: 4px;
+}
+
+/*#setStart{
+  width: 40px;
+  position: relative;
+  top: -73px;
+  left: 95px;
+  line-height: 20px;
+  font-size: 10px;
+}
+
+#setStrict{
+  position: relative;
+  width: 40px;
+  top: -118px;
+  left: 140px;
+  line-height: 20px;
+  font-size: 10px;
+}
+
+*/
+#start{ 
+  background-color: red;
+  border-color: red;
+  float: right;
+  
+}
+
+
+#strict{ 
+  background-color: yellow;
+  border-color: yellow;
+  float: right;
+}
+
+.fa{
+  visibility: hidden;
+  color: red;
+  float: right;
+  margin-top: 4px;
+}
+
+#onOff{
+  position: relative;
+  top: -55px;
+  left: -15x;
+  font-size: 10px;
+
+}
+
+.state{
+  position: relative;
+  top: -8px;
+}
+/*track button runs on*/
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 20px;
+  margin: 3px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;} 
+
+/* The slider itself*/
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #3a0d0a;
+  -webkit-transition: .7s;
+  transition: .7s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 26px;
+  left: 0px;
+  bottom: 0px;
+    background: linear-gradient(to right, #47100D 0%, #661116 50%, #47100D 100%);
+  border: 1px solid #260706;
+  -webkit-transition: .7s;
+  transition: .7s;
+}
+
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(32px);
+  -ms-transform: translateX(32px);
+  transform: translateX(32px);
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outlinne: none;
+}
