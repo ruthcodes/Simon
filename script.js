@@ -1,14 +1,20 @@
+//TODO implement strict/regular
+//TODO implement counter
+//TODO write funtion for wrongMove
+//TODO write function to 'reset' device(when turned off, or after wrongMove in strict mode)
+
 document.addEventListener("DOMContentLoaded", function(event) {
 
   let usersMoves = [];
   let simonsMoves = [];
   let gameOn = false;
+  let userCanMove = false;
   let strictMode = false;
   let hasClicked = false;
   let compareIndex = 0;
 
   document.querySelectorAll('.colour').forEach(colour => {
-    colour.addEventListener("click", (e) => selectMove(e))
+    colour.addEventListener("click", (e) => {if (gameOn && userCanMove) selectMove(e)})
   })
 
   const selectMove = async (e) => {
@@ -25,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       //wait 2 seconds and then start next turn
       usersMoves = [];
       compareIndex = 0;
+      userCanMove = false;
       setTimeout(()=> {play()},2000)
     }
   }
@@ -46,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     const colours = ["red", "yellow", "green", "blue"];
     let move = colours[Math.floor(Math.random()*colours.length)];
     simonsMoves.push(move);
-    //console.log(simonsMoves);
   }
 
   compare = (colour) => {
@@ -59,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
   }
 
-  document.querySelector('#start').addEventListener("click", () => play())
+  document.querySelector('#start').addEventListener("click", () => {if (gameOn) play()})
 
   const flash = async (colour, speed) => {
     if (gameOn){
@@ -104,15 +110,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
 
   const play = async () => {
+    usersCanMove = false;
     chooseSimonsMoves();
     await playSimonsMoves();
-    console.log("simon done, starting user turn")
     usersTurn()
   }
 
   const usersTurn = async () => {
+    userCanMove = true;
     hasClicked = false;
-    // wait 2 seconds for user to enter move
+    // timeout cleared on user click
     waitForUser = setTimeout(()=> {
       wrongMove();
     }, 2000)
