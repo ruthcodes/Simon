@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   let gameOn = false;
   let strictMode = false;
   let hasClicked = false;
+  let compareIndex = 0;
 
   document.querySelectorAll('.colour').forEach(colour => {
     colour.addEventListener("click", (e) => selectMove(e))
@@ -15,13 +16,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
     clearTimeout(waitForUser);
     usersMoves.push(e.target.id);
     await flash(e.target.id);
-    console.log(usersMoves)
-    console.log(simonsMoves)
+    if (!compare(e.target.id)){
+      return wrongMove();
+    }
     if (usersMoves.length < simonsMoves.length){
-      usersTurn()
+      await usersTurn()
     } else {
+      //wait 2 seconds and then start next turn
       usersMoves = [];
-      play()
+      compareIndex = 0;
+      setTimeout(()=> {play()},2000)
     }
   }
 
@@ -43,6 +47,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
     let move = colours[Math.floor(Math.random()*colours.length)];
     simonsMoves.push(move);
     //console.log(simonsMoves);
+  }
+
+  compare = (colour) => {
+    if (colour === simonsMoves[compareIndex]){
+      compareIndex +=1;
+      return true
+    } else {
+      compareIndex = 0;
+      return false;
+    }
   }
 
   document.querySelector('#start').addEventListener("click", () => play())
@@ -92,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   const play = async () => {
     chooseSimonsMoves();
     await playSimonsMoves();
+    console.log("simon done, starting user turn")
     usersTurn()
   }
 
@@ -101,39 +116,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
     waitForUser = setTimeout(()=> {
       wrongMove();
     }, 2000)
-
-    /*await new Promise((resolve) => setTimeout(() => {
-      resolve();
-    }, 2000));
-    // if userMoves within time,
-    if (hasClicked){
-      //clear the timeout from above
-      console.log("they clicked")
-      //console.log(`usersMoves: ${usersMoves.length}, simonsMoves: ${simonsMoves.length}`)
-      if (usersMoves.length < simonsMoves.length){
-        console.log("It's still the users turn, calling it again")
-        //console.log(`usersMoves: ${usersMoves.length}, simonsMoves: ${simonsMoves.length}`)
-        usersTurn();
-      } else {
-        console.log("computers move")
-        usersMoves = [];
-        play()
-      }
-    } else {
-      wrongMove()
-    }
-    */
-
-
-
-    // compare it to same index in simonsMoves
   }
 
   const wrongMove = () => {
     console.log("wrong!")
   }
 
-// if userMoves within time, compare it to same index in simonsMoves
-// else, wrong
-// if it's the last of simons moves, start again
 });
