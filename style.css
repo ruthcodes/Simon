@@ -153,6 +153,16 @@ b{
   line-height: 25px;
 }
 
+@-webkit-keyframes flash{
+  50% {
+    color: white;
+  }
+}
+
+.flash{
+  -webkit-animation: flash 2s linear infinite !important;
+}
+
 
 button{
   height: 20px;

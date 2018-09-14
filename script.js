@@ -1,7 +1,5 @@
 //TODO implement strict/regular
 //TODO implement counter
-//TODO write funtion for wrongMove
-//TODO write function to 'reset' device(when turned off, or after wrongMove in strict mode)
 
 document.addEventListener("DOMContentLoaded", function(event) {
 
@@ -13,6 +11,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
   let hasClicked = false;
   let compareIndex = 0;
 
+  const counter = document.getElementById("counter");
+
   document.querySelectorAll('.colour').forEach(colour => {
     colour.addEventListener("click", (e) => {if (gameOn && userCanMove) selectMove(e)})
   })
@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     usersMoves.push(e.target.id);
     await flash(e.target.id);
     if (!compare(e.target.id)){
+
       return wrongMove();
     }
     if (usersMoves.length < simonsMoves.length){
@@ -68,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document.querySelector('#start').addEventListener("click", () => {if (gameOn) play()})
 
   const flash = async (colour, speed) => {
+
     if (gameOn){
       switch(colour) {
         case "red":
@@ -126,7 +128,22 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
 
   const wrongMove = () => {
-    console.log("wrong!")
+    counter.innerHTML = "! !"
+    counter.classList.add("flash");
+    setTimeout(()=> counter.classList.remove("flash"), 4000)
+    let wrongNoise = new Audio("https://s3.amazonaws.com/freecodecamp/simonSound4.mp3");
+    wrongNoise.playbackRate = 0.25;
+    wrongNoise.play();
+    reset();
+  }
+
+  reset = () => {
+    usersMoves = [];
+    simonsMoves = [];
+    userCanMove = false;
+    hasClicked = false;
+    compareIndex = 0;
+    if (waitForUser) clearTimeout(waitForUser);
   }
 
 });
