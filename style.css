@@ -155,12 +155,18 @@ b{
 
 @-webkit-keyframes flash{
   50% {
-    color: white;
+    color: #58655C;
+  }
+}
+@keyframes flash {
+  50% {
+    color: #58655C;
   }
 }
 
 .flash{
   -webkit-animation: flash 2s linear infinite !important;
+  animation: flash 2s linear infinite !important;
 }
 
 
