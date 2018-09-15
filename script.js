@@ -1,4 +1,4 @@
-//TODO implement strict/regular
+
 //TODO implement counter
 
 document.addEventListener("DOMContentLoaded", function(event) {
@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   let strictMode = false;
   let hasClicked = false;
   let compareIndex = 0;
+  let moveCounter = "00";
 
   const counter = document.getElementById("counter");
 
@@ -23,13 +24,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
     usersMoves.push(e.target.id);
     await flash(e.target.id);
     if (!compare(e.target.id)){
-
       return wrongMove();
     }
     if (usersMoves.length < simonsMoves.length){
       await usersTurn()
     } else {
       //wait 2 seconds and then start next turn
+      setMoveCounter();
       usersMoves = [];
       compareIndex = 0;
       userCanMove = false;
@@ -39,6 +40,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   document.querySelector('input').addEventListener("click", () => {
     gameOn = !gameOn;
+    counter.style.color = gameOn ? "white" : "#58655C"
     toggleStrictMode();
     turnOn()
   })
@@ -100,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   const playSimonsMoves = async () => {
     for (move in simonsMoves){
-      await flash(simonsMoves[move], 800)
+      await flash(simonsMoves[move], 600)
     }
   }
 
@@ -111,9 +113,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
     await flash("yellow", 300);
   }
 
-  const play = async () => {
+  const play = async (replay) => {
     usersCanMove = false;
-    chooseSimonsMoves();
+    if(!replay){ chooseSimonsMoves()};
     await playSimonsMoves();
     usersTurn()
   }
@@ -127,14 +129,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }, 2000)
   }
 
-  const wrongMove = () => {
+  const wrongMove = async () => {
     counter.innerHTML = "! !"
     counter.classList.add("flash");
-    setTimeout(()=> counter.classList.remove("flash"), 4000)
     let wrongNoise = new Audio("https://s3.amazonaws.com/freecodecamp/simonSound4.mp3");
     wrongNoise.playbackRate = 0.25;
     wrongNoise.play();
-    reset();
+    setTimeout(()=> {
+      counter.classList.remove("flash");
+      setMoveCounter("wrong");
+    }, 4000)
+    strictMode ? reset() : setTimeout(()=>{play("replay")}, 4000)
   }
 
   reset = () => {
@@ -144,6 +149,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
     hasClicked = false;
     compareIndex = 0;
     if (waitForUser) clearTimeout(waitForUser);
+  }
+
+  setMoveCounter = (wrong) => {
+    let len = simonsMoves.length;
+    if (len > 0){
+      if (wrong) {len -= 1}
+      moveCounter = len < 10 ? "0"+ len : len.toString();
+    }
+    counter.style.color = "white";
+    counter.innerHTML = moveCounter || "00"
   }
 
 });
