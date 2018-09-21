@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function(event) {
-
   let usersMoves = [];
   let simonsMoves = [];
   let gameOn = false;
@@ -8,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   let hasClicked = false;
   let compareIndex = 0;
   let moveCounter = "00";
-
+  const colours = ["red", "yellow", "green", "blue"];
   const counter = document.getElementById("counter");
 
   document.querySelectorAll('.colour').forEach(colour => {
@@ -38,7 +37,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
         setTimeout(()=> {play()},2000)
       }
     }
-
   }
 
   document.querySelector('input').addEventListener("click", () => {
@@ -56,9 +54,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
 
   const chooseSimonsMoves = () => {
-    const colours = ["red", "yellow", "green", "blue"];
-    let move = colours[Math.floor(Math.random()*colours.length)];
-    simonsMoves.push(move);
+    simonsMoves.push(colours[Math.floor(Math.random()*colours.length)]);
   }
 
   const compare = (colour) => {
@@ -144,13 +140,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
     wrongNoise.play();
     await setTimeout(()=> {
       counter.classList.remove("flash");
-      if(!strictMode){
-        setMoveCounter("wrong")
-      } else {
-        counter.innerHTML = "00"
-      }
+      setMoveCounter("wrong");
+      strictMode ? reset() : play("replay")
     }, 4000)
-    strictMode ? reset() : setTimeout(()=>{play("replay")}, 4000)
+
   }
 
   const reset = () => {
@@ -160,6 +153,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     hasClicked = false;
     compareIndex = 0;
     moveCounter = "00";
+    if (gameOn) counter.innerHTML = "00";
     counter.classList.remove("flash");
     clearAllTimeouts();
   }
@@ -174,7 +168,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   const setMoveCounter = (wrong) => {
     let len = simonsMoves.length;
     if (len > 0){
-
       if (wrong) {len -= 1}
       moveCounter = len < 10 ? "0"+ len : len.toString();
     }
