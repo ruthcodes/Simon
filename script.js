@@ -18,25 +18,27 @@ document.addEventListener("DOMContentLoaded", function(event) {
   const selectMove = async (e) => {
     hasClicked = true;
     clearTimeout(waitForUser);
-    usersMoves.push(e.target.id);
-    await flash(e.target.id);
-    if (!compare(e.target.id)){
-      return wrongMove();
+    if (usersMoves.length < 20){
+      usersMoves.push(e.target.id);
+      await flash(e.target.id);
+
+      if (!compare(e.target.id)) return wrongMove();
+
+      if (usersMoves.length < simonsMoves.length){
+        await usersTurn()
+      } else {
+        if (usersMoves.length === 20){
+          return setTimeout(()=> {userWon()}, 1000)
+        }
+        //wait 2 seconds and then start next turn
+        setMoveCounter();
+        usersMoves = [];
+        compareIndex = 0;
+        userCanMove = false;
+        setTimeout(()=> {play()},2000)
+      }
     }
 
-    if (usersMoves.length < simonsMoves.length){
-      await usersTurn()
-    } else {
-      if (usersMoves.length === 20){
-        return userWon();
-      }
-      //wait 2 seconds and then start next turn
-      setMoveCounter();
-      usersMoves = [];
-      compareIndex = 0;
-      userCanMove = false;
-      setTimeout(()=> {play()},2000)
-    }
   }
 
   document.querySelector('input').addEventListener("click", () => {
@@ -48,18 +50,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   document.querySelector('#strict').addEventListener("click", (e) => toggleStrictMode(e))
   //e only true when called by strict button press
-  toggleStrictMode = (e) => {
+  const toggleStrictMode = (e) => {
     strictMode = gameOn && e ? !strictMode : false
     document.getElementById("strictLight").style.visibility = strictMode ? "visible" : "hidden";
   }
 
-  chooseSimonsMoves = () => {
+  const chooseSimonsMoves = () => {
     const colours = ["red", "yellow", "green", "blue"];
     let move = colours[Math.floor(Math.random()*colours.length)];
     simonsMoves.push(move);
   }
 
-  compare = (colour) => {
+  const compare = (colour) => {
     if (colour === simonsMoves[compareIndex]){
       compareIndex +=1;
       return true
@@ -72,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document.querySelector('#start').addEventListener("click", () => {if (gameOn) play()})
 
   const flash = async (colour, speed) => {
-
     if (gameOn){
       switch(colour) {
         case "red":
@@ -95,8 +96,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
       let audio = new Audio(file);
       document.getElementById(colour).style.background = colour;
       //flash colour and play sound simultaneously
-      setTimeout(() => {document.getElementById(colour).style.background = defaultColor}, 100)
       audio.play();
+      setTimeout(() => {document.getElementById(colour).style.background = defaultColor}, 100)
+
       await new Promise((resolve) => setTimeout(() => {resolve()}, speed));
     }
   }
@@ -151,27 +153,28 @@ document.addEventListener("DOMContentLoaded", function(event) {
     strictMode ? reset() : setTimeout(()=>{play("replay")}, 4000)
   }
 
-  reset = () => {
+  const reset = () => {
     usersMoves = [];
     simonsMoves = [];
     userCanMove = false;
     hasClicked = false;
     compareIndex = 0;
     moveCounter = "00";
+    counter.classList.remove("flash");
     clearAllTimeouts();
   }
 
-  clearAllTimeouts = () =>{
+  const clearAllTimeouts = () =>{
     let id = window.setTimeout(null,0);
     while (id--) {
       window.clearTimeout(id);
     }
   };
 
-  setMoveCounter = (wrong) => {
+  const setMoveCounter = (wrong) => {
     let len = simonsMoves.length;
     if (len > 0){
-      console.log(len)
+
       if (wrong) {len -= 1}
       moveCounter = len < 10 ? "0"+ len : len.toString();
     }
@@ -179,11 +182,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
     counter.innerHTML = moveCounter || "00"
   }
 
-  userWon = async () => {
-    counter.innerHTML = "&#x263a"
-    await turnOn();
+  const userWon = async () => {
     alert("You won!");
-    counter.innerHTML = "00";
-    reset();
+    await reset();
+    setMoveCounter();
   }
 });
