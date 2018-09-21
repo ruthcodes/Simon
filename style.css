@@ -2,22 +2,13 @@
 
 */
 
-/*html{
-  background-color: #383433;
-  background-image: url("https://images.pexels.com/photos/82256/pexels-photo-82256.jpeg?w=1260&h=750&auto=compress&cs=tinysrgb");
-  background-repeat: no-repeat;
-  background-size:cover;
-}*/
-/*all body is added for screenshot*/
-body{
-  display: inline;
-  min-height: 100vh;
-  min-width: 100vw;
+html{
   background-color: #383433;
   background-image: url("https://images.pexels.com/photos/82256/pexels-photo-82256.jpeg?w=1260&h=750&auto=compress&cs=tinysrgb");
   background-repeat: no-repeat;
   background-size:cover;
 }
+
 
 .wrapper {
   position: relative;
@@ -162,6 +153,22 @@ b{
   line-height: 25px;
 }
 
+@-webkit-keyframes flash{
+  50% {
+    color: #58655C;
+  }
+}
+@keyframes flash {
+  50% {
+    color: #58655C;
+  }
+}
+
+.flash{
+  -webkit-animation: flash 2s linear infinite !important;
+  animation: flash 2s linear infinite !important;
+}
+
 
 button{
   height: 20px;
@@ -192,34 +199,16 @@ button{
   margin-bottom: 4px;
 }
 
-/*#setStart{
-  width: 40px;
-  position: relative;
-  top: -73px;
-  left: 95px;
-  line-height: 20px;
-  font-size: 10px;
-}
 
-#setStrict{
-  position: relative;
-  width: 40px;
-  top: -118px;
-  left: 140px;
-  line-height: 20px;
-  font-size: 10px;
-}
-
-*/
-#start{ 
+#start{
   background-color: red;
   border-color: red;
   float: right;
-  
+
 }
 
 
-#strict{ 
+#strict{
   background-color: yellow;
   border-color: yellow;
   float: right;
@@ -254,7 +243,7 @@ button{
 }
 
 /* Hide default HTML checkbox */
-.switch input {display:none;} 
+.switch input {display:none;}
 
 /* The slider itself*/
 .slider {
